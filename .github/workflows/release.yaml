@@ -21,7 +21,12 @@ jobs:
       - name: Setup environment
         uses: ./.github/setup
 
+      - name: Build package
+        id: build
+        run: bun run build
+
       - name: Create Release Pull Request
+        if: steps.build.conclusion == 'success'
         uses: changesets/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
