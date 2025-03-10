@@ -9,7 +9,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Version Package
+    name: release-package
     if: github.repository == 'pulgueta/lazymage'
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +25,7 @@ jobs:
         uses: changesets/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           createGithubReleases: true
           commit: "chore(release): release"
