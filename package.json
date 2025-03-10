@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "Lazy load images from your React components",
   "main": "dist/index.js",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "react": "^18.x.x || ^19.x.x"
   },
