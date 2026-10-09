@@ -31,8 +31,11 @@ jobs:
           name: tegami-pr-preview
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
+          # The artifact comes from pull request code, also from forks. Keep it
+          # out of the workspace so that it cannot replace a script that runs.
+          path: ${{ runner.temp }}/tegami-pr-preview
 
       - name: Post preview comment
-        run: bun run tegami pr comment tegami-pr-preview.md
+        run: bun run tegami pr comment "$RUNNER_TEMP/tegami-pr-preview/tegami-pr-preview.md"
         env:
           GITHUB_TOKEN: ${{ github.token }}
