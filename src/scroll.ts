@@ -92,8 +92,13 @@ export const getScrollAncestor = (
 ): HTMLElement | Window => {
   let current: Node | null = element;
 
-  while (current instanceof HTMLElement) {
-    if (SCROLLABLE_OVERFLOW.test(getOverflowValues(current))) {
+  // Start from any element, like an SVG shape, but only HTML elements can
+  // be the scroll container.
+  while (current instanceof Element) {
+    if (
+      current instanceof HTMLElement &&
+      SCROLLABLE_OVERFLOW.test(getOverflowValues(current))
+    ) {
       return current;
     }
 

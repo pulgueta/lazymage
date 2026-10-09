@@ -1,5 +1,5 @@
 import type { ComponentType, Ref, RefCallback } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { mergeRefs } from "./merge-refs";
 import { isIntersectionObserverAvailable } from "./observer";
@@ -67,8 +67,12 @@ const ScrollTracker = <F,>({
       setScrollTarget(null);
     };
   }, []);
-  const componentRef = useMemo(
-    () => mergeRefs(ref, trackScrollTarget),
+  // A class component gives its instance to the ref, not an element. Give
+  // `null` in its place, so that the HOC tracks the window and the ref of
+  // the user gets only an `Element`, as its type says.
+  const componentRef = useCallback<RefCallback<unknown>>(
+    (node) =>
+      mergeRefs(ref, trackScrollTarget)(node instanceof Element ? node : null),
     [ref, trackScrollTarget]
   );
 

@@ -142,6 +142,46 @@ describe(observeVisibility, () => {
     stopCurrent();
   });
 
+  it("calls every callback that watches the same target", () => {
+    const io = installIntersectionObserver();
+    const target = createTarget();
+    const first = vi.fn<() => void>();
+    const second = vi.fn<() => void>();
+
+    observeVisibility(target, { rootMargin: "0px" }, first);
+    observeVisibility(target, { rootMargin: "0px" }, second);
+    io.intersect(target);
+
+    expect(first).toHaveBeenCalledOnce();
+    expect(second).toHaveBeenCalledOnce();
+    expect(io.observersOf(target)).toHaveLength(0);
+  });
+
+  it("keeps the target observed until its last subscription stops", () => {
+    const io = installIntersectionObserver();
+    const target = createTarget();
+    const onVisible = vi.fn<() => void>();
+
+    const stopFirst = observeVisibility(
+      target,
+      { rootMargin: "0px" },
+      onVisible
+    );
+    const stopSecond = observeVisibility(
+      target,
+      { rootMargin: "0px" },
+      onVisible
+    );
+    stopFirst();
+
+    expect(io.observersOf(target)).toHaveLength(1);
+
+    io.intersect(target);
+
+    expect(onVisible).toHaveBeenCalledOnce();
+    expect(stopSecond).not.toThrow();
+  });
+
   it("passes scrollMargin only when the browser supports it", () => {
     const supported = installIntersectionObserver();
     observeVisibility(

@@ -99,6 +99,21 @@ describe(getScrollAncestor, () => {
     expect(getScrollAncestor(child)).toBe(container);
   });
 
+  it("starts from an SVG element and returns its scrollable ancestor", () => {
+    const container = document.createElement("div");
+    container.style.overflowY = "auto";
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const circle = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
+    svg.append(circle);
+    container.append(svg);
+    document.body.append(container);
+
+    expect(getScrollAncestor(circle)).toBe(container);
+  });
+
   it("returns window when no ancestor scrolls or there is no element", () => {
     const child = document.createElement("span");
     document.body.append(child);
