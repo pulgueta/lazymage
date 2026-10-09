@@ -1,9 +1,6 @@
----
-packages:
-  lazymage: major
----
+## lazymage@1.0.0
 
-## Rewrite in TypeScript for React 19
+### Rewrite in TypeScript for React 19
 
 lazymage is now a TypeScript library for React 19. It keeps the API of `react-lazy-load-image-component`. To migrate, change the import.
 

@@ -1,0 +1,11 @@
+core:changelogs:
+  - content: "---\npackages:\n  lazymage:\n    type: major\n---\n\n## Rewrite in TypeScript for React 19\n\nlazymage is now a TypeScript library for React 19. It keeps the API of `react-lazy-load-image-component`. To migrate, change the import.\n\n- Add the `useLazyLoad` and `useImageStatus` hooks.\n- Add the `fallbackSrc` prop. It shows one fallback image when `src` fails to load.\n- Add the `onReady` prop. It runs when the image is loaded and decoded.\n- Add the `preload` prop. It fetches the image early with `react-dom` `preload()`.\n- Add the `root` and `scrollMargin` props for scroll containers.\n- Add the `data-state` attribute on the image and its wrapper.\n- Turn off the effect transitions when the user prefers reduced motion.\n- Remove all runtime dependencies.\n"
+    filename: 2026-10-08-ee3de1.md
+    v: 0.0.0
+core:packages:
+  - changelogIds:
+      - 2026-10-08-ee3de1.md
+    id: npm:lazymage
+    updated: true
+npm:packages:
+  - id: npm:lazymage
