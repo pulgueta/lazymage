@@ -46,7 +46,7 @@ With `visibleByDefault`, lazymage does not show a placeholder or an effect.
 Set `preload` to start the download early. lazymage calls the `react-dom` `preload()` function with `src`, `srcSet`, `sizes`, and `fetchPriority`. On the server, React adds a `<link rel="preload">` to the document head.
 
 ```tsx
-<LazyLoadImage alt="Hero" preload src="/hero.jpg" />
+<LazyLoadImage alt="Hero" preload src="/hero.jpg" visibleByDefault />
 ```
 
 <Callout type="warning">
