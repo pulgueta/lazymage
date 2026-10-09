@@ -6,6 +6,8 @@ on:
 
 jobs:
   claude-review:
+    # Fork pull requests do not get repository secrets, so the review cannot run.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
