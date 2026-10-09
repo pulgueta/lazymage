@@ -1,0 +1,41 @@
+name: Run Tegami for the release preview comment
+
+# Runs in the base repository with write access. It never runs pull request code.
+on:
+  workflow_run:
+    workflows: ["Run Tegami for the release preview"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  tegami:
+    name: Tegami
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/setup
+
+      # The artifact comes from pull request code, also from forks. Keep it
+      # out of the workspace so that it cannot replace a script that runs.
+      - name: Download preview
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tegami-pr-preview
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/tegami-pr-preview
+
+      - name: Comment
+        run: bun run tegami pr comment "$RUNNER_TEMP/tegami-pr-preview/tegami-pr-preview.md"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
