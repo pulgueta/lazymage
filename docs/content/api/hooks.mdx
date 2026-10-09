@@ -1,0 +1,109 @@
+---
+title: Hooks
+description: Build your own lazy components with useLazyLoad and useImageStatus.
+---
+
+Use the hooks when the components do not fit your markup. `LazyLoadImage` and `LazyLoadComponent` use the same hooks.
+
+## useLazyLoad
+
+`useLazyLoad` tells you when an element comes near the viewport.
+
+```tsx
+import { useLazyLoad } from "lazymage";
+
+export const LazyVideo = ({ src }: { src: string }) => {
+  const { ref, isVisible } = useLazyLoad<HTMLDivElement>({ threshold: 200 });
+
+  return (
+    <div ref={ref} style={{ aspectRatio: "16 / 9" }}>
+      {isVisible ? <video controls src={src} /> : null}
+    </div>
+  );
+};
+```
+
+Attach `ref` to the element to observe. `isVisible` becomes `true` when the element comes near the viewport. It does not go back to `false`.
+
+On the server and on the first client render, `isVisible` is `false`. Set `visibleByDefault` to make it `true` at once.
+
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `threshold` | `number` | `100` | Distance in px from the viewport at which the element becomes visible. |
+| `root` | `Element \| Document \| null` | `null` | Scroll container for the `IntersectionObserver`. `null` is the viewport. |
+| `scrollMargin` | `number \| string` | — | Margin for nested scroll containers, in px or as a CSS length. |
+| `visibleByDefault` | `boolean` | `false` | Make the element visible at once, without observing it. |
+| `useIntersectionObserver` | `boolean` | `true` | Use an `IntersectionObserver` when the browser supports it. |
+| `scrollPosition` | `ScrollPosition \| null` | — | Scroll position from [`trackWindowScroll`](/api/track-window-scroll). |
+| `delayMethod` | `"throttle" \| "debounce"` | `"throttle"` | How to limit the scroll and resize checks without `IntersectionObserver`. |
+| `delayTime` | `number` | `300` | Time in ms for `delayMethod`. |
+| `onVisible` | `() => void` | — | Called one time, right before the element becomes visible. |
+
+### Result
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `ref` | `RefCallback<T>` | Attach this ref to the element to observe. |
+| `isVisible` | `boolean` | `true` after the element came near the viewport. |
+
+## useImageStatus
+
+`useImageStatus` tracks the load of an `<img>`. It waits for `decode()` before the state is `loaded`. It also finds images that loaded before the ref attached, like cached images and images loaded before hydration.
+
+```tsx
+import { useImageStatus } from "lazymage";
+
+export const Avatar = ({ src }: { src: string }) => {
+  const {
+    ref,
+    state,
+    src: currentSrc,
+    onLoad,
+    onError,
+    retry,
+  } = useImageStatus({
+    fallbackSrc: "/avatar-default.png",
+    src,
+  });
+
+  return (
+    <figure data-state={state}>
+      <img
+        alt=""
+        onError={onError}
+        onLoad={onLoad}
+        ref={ref}
+        src={currentSrc}
+      />
+      {state === "error" ? (
+        <button onClick={retry} type="button">
+          Try again
+        </button>
+      ) : null}
+    </figure>
+  );
+};
+```
+
+Give `ref`, `src`, `onLoad`, and `onError` from the result to the `<img>`.
+
+### Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `src` | `string` | The image source. A new value resets the state to `loading`. |
+| `fallbackSrc` | `string` | Source to use one time, when `src` fails to load. |
+| `onReady` | `(image: HTMLImageElement) => void` | Called when the image is loaded and decoded. |
+
+### Result
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `ref` | `RefCallback<HTMLImageElement>` | Attach this ref to the `<img>`. |
+| `state` | `"loading" \| "loaded" \| "error"` | The load state of the image. |
+| `src` | `string \| undefined` | The source for the `<img>`: `src`, or `fallbackSrc` after an error. |
+| `retry` | `() => void` | Load the original `src` again. |
+| `onLoad` | `(event) => void` | Give this handler to the `onLoad` prop of the `<img>`. |
+| `onError` | `(event) => void` | Give this handler to the `onError` prop of the `<img>`. |

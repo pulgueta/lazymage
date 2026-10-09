@@ -1,0 +1,56 @@
+---
+title: trackWindowScroll
+description: Track the scroll in one place for many lazy elements.
+---
+
+`trackWindowScroll` is a higher-order component. It tracks the scroll position one time and gives it to your component as the `scrollPosition` prop. Give this prop to each lazy element in the component.
+
+## When to use it
+
+Use `trackWindowScroll` only when lazymage cannot use an `IntersectionObserver`:
+
+- You set `useIntersectionObserver={false}`.
+- The browser does not support `IntersectionObserver`.
+
+In these cases, each lazy element listens to scroll and resize events. With `trackWindowScroll`, only the higher-order component listens. When lazymage uses an `IntersectionObserver`, `scrollPosition` is `null` and the higher-order component adds no listeners.
+
+## Example
+
+```tsx
+import type { ScrollPositionProps } from "lazymage";
+import { LazyLoadImage, trackWindowScroll } from "lazymage";
+
+interface GalleryProps extends ScrollPositionProps {
+  images: { alt: string; src: string }[];
+}
+
+const Gallery = ({ images, scrollPosition }: GalleryProps) => (
+  <div>
+    {images.map((image) => (
+      <LazyLoadImage
+        alt={image.alt}
+        key={image.src}
+        scrollPosition={scrollPosition}
+        src={image.src}
+      />
+    ))}
+  </div>
+);
+
+export default trackWindowScroll(Gallery);
+```
+
+## Props
+
+The component that `trackWindowScroll` returns accepts the props of your component, without `scrollPosition`, and these props:
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `delayMethod` | `"throttle" \| "debounce"` | `"throttle"` | How to limit the scroll and resize updates. |
+| `delayTime` | `number` | `300` | Time in ms for `delayMethod`. |
+| `useIntersectionObserver` | `boolean` | `true` | Use an `IntersectionObserver` when the browser supports it. lazymage gives this prop to your component. |
+| `ref` | `Ref<Element>` | — | lazymage gives this ref to your component. |
+
+## Scroll containers
+
+`trackWindowScroll` gives a `ref` to your component. If your component attaches this ref to an element, lazymage also tracks the scroll container of that element. If not, lazymage tracks only the window.

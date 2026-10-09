@@ -1,0 +1,59 @@
+---
+title: SSR and React Server Components
+description: Render lazy images on the server and show images above the fold at once.
+---
+
+## The "use client" boundary
+
+The lazymage build starts with `"use client"`. You can import the components in a Server Component and render them there. React renders them on the client.
+
+Props that go from a Server Component to a client component must be serializable. You cannot give functions, like `onLoad`, `onReady`, or `beforeLoad`, from a Server Component. To use them, render `LazyLoadImage` in a Client Component.
+
+```tsx
+// app/page.tsx (Server Component)
+import { LazyLoadImage } from "lazymage";
+
+export default function Page() {
+  return (
+    <LazyLoadImage alt="A lake" height={480} src="/lake.jpg" width={640} />
+  );
+}
+```
+
+## What the server renders
+
+On the server and on the first client render, lazymage does not know the position of the element. It renders the placeholder, not the image. The image renders after hydration, when it comes near the viewport.
+
+## Images above the fold
+
+An image that the user sees at once must not wait for hydration. Set `visibleByDefault`. Then the server HTML contains the `<img>`, and the browser loads it at once.
+
+```tsx
+<LazyLoadImage
+  alt="Hero"
+  fetchPriority="high"
+  height={600}
+  src="/hero.jpg"
+  visibleByDefault
+  width={1200}
+/>
+```
+
+With `visibleByDefault`, lazymage does not show a placeholder or an effect.
+
+## Preload an image
+
+Set `preload` to start the download early. lazymage calls the `react-dom` `preload()` function with `src`, `srcSet`, `sizes`, and `fetchPriority`. On the server, React adds a `<link rel="preload">` to the document head.
+
+```tsx
+<LazyLoadImage alt="Hero" preload src="/hero.jpg" />
+```
+
+<Callout type="warning">
+  `preload` downloads the image before it comes near the viewport. Use it only
+  for images that the user sees at once.
+</Callout>
+
+## Hydration and onLoad
+
+An image can finish loading before React hydrates the page. lazymage finds this image and sets the state to `loaded`. It also calls `onReady`. No `load` event reaches React, so `onLoad` and `afterLoad` do not run.

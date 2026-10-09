@@ -1,0 +1,95 @@
+---
+title: Styling
+description: Use the effects, the data-state attribute, and reduced motion.
+---
+
+## Use an effect
+
+Import the CSS file of the effect one time. Then set the `effect` prop.
+
+```tsx
+import "lazymage/effects/blur.css";
+
+<LazyLoadImage
+  alt="A lake"
+  effect="blur"
+  placeholderSrc="/lake-small.jpg"
+  src="/lake.jpg"
+/>;
+```
+
+| Effect | CSS file | What the user sees |
+| --- | --- | --- |
+| `blur` | `lazymage/effects/blur.css` | A blurred placeholder that becomes sharp. |
+| `opacity` | `lazymage/effects/opacity.css` | The image fades in. |
+| `black-and-white` | `lazymage/effects/black-and-white.css` | A gray placeholder that gets its colors. |
+
+The effects use the wrapper classes. The wrapper always has `lazy-load-image-background` and the effect name. It gets `lazy-load-image-loaded` when the image is loaded.
+
+## Change the transition duration
+
+The effects use a 0.3 s transition. To change it, write a rule with the same selector after the effect import.
+
+```css
+.lazy-load-image-background.opacity.lazy-load-image-loaded {
+  transition-duration: 0.8s;
+}
+```
+
+The `blur` and `black-and-white` effects also animate the `<img>`. Change both rules:
+
+```css
+.lazy-load-image-background.blur.lazy-load-image-loaded,
+.lazy-load-image-background.blur.lazy-load-image-loaded > img {
+  transition-duration: 0.8s;
+}
+```
+
+## Write your own effect
+
+Set `effect` to your class name, and write the CSS for it.
+
+```css
+.lazy-load-image-background.zoom > img {
+  transform: scale(1.05);
+}
+
+.lazy-load-image-background.zoom.lazy-load-image-loaded > img {
+  transform: scale(1);
+  transition: transform 0.4s;
+}
+```
+
+```tsx
+<LazyLoadImage alt="A lake" effect="zoom" src="/lake.jpg" />
+```
+
+## Style the load state
+
+The `<img>` and the wrapper have a `data-state` attribute: `idle`, `loading`, `loaded`, or `error`. Only the wrapper uses `idle`. Use the attribute in CSS selectors.
+
+```css
+/* Show a border while the image loads. */
+.lazy-load-image-background[data-state="loading"] {
+  outline: 1px solid #e5e5e5;
+}
+
+/* Hide a broken image icon. */
+img[data-state="error"] {
+  visibility: hidden;
+}
+```
+
+## Reduced motion
+
+The effects do not animate when the user prefers reduced motion. The `prefers-reduced-motion: reduce` media query turns off their transitions.
+
+Do the same for your own effects:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .lazy-load-image-background.zoom.lazy-load-image-loaded > img {
+    transition: none;
+  }
+}
+```

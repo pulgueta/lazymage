@@ -1,0 +1,84 @@
+---
+title: LazyLoadImage
+description: An image that renders only when it comes near the viewport.
+---
+
+```tsx
+import { LazyLoadImage } from "lazymage";
+
+<LazyLoadImage
+  alt="A lake at sunset"
+  height={480}
+  src="/lake.jpg"
+  width={640}
+/>;
+```
+
+`LazyLoadImage` accepts all the props of `<img>`, like `src`, `alt`, `srcSet`, `sizes`, `fetchPriority`, and `ref`. It gives them to the `<img>` element. `decoding` is `"async"` by default.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `threshold` | `number` | `100` | Distance in px from the viewport at which the image renders. |
+| `visibleByDefault` | `boolean` | `false` | Render the image at once, without a placeholder or an effect. |
+| `placeholder` | `ReactNode` | — | Content to show until the image renders. |
+| `placeholderSrc` | `string` | — | Image to show as the wrapper background until the image loads. |
+| `effect` | `string` | — | Effect class name, like `blur`. Import the CSS file of the effect. |
+| `wrapperClassName` | `string` | — | Class name of the wrapper `<span>`. |
+| `wrapperProps` | `ComponentProps<"span">` | — | Props of the wrapper `<span>`. They override the default wrapper props. |
+| `beforeLoad` | `() => void` | — | Called one time, right before the image renders. |
+| `onLoad` | `(event) => void` | — | Called when the `<img>` loads. |
+| `afterLoad` | `() => void` | — | Deprecated. Use `onLoad`. |
+| `useIntersectionObserver` | `boolean` | `true` | Use an `IntersectionObserver` when the browser supports it. |
+| `scrollPosition` | `ScrollPosition \| null` | — | Scroll position from [`trackWindowScroll`](/api/track-window-scroll). |
+| `delayMethod` | `"throttle" \| "debounce"` | `"throttle"` | How to limit the scroll and resize checks without `IntersectionObserver`. |
+| `delayTime` | `number` | `300` | Time in ms for `delayMethod`. |
+
+### New props
+
+These props are not in `react-lazy-load-image-component`.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `fallbackSrc` | `string` | — | Image to show one time, when `src` fails to load. |
+| `onReady` | `(image: HTMLImageElement) => void` | — | Called when the image is loaded and decoded. |
+| `preload` | `boolean` | `false` | Fetch the image early with the `react-dom` `preload()` function. |
+| `root` | `Element \| Document \| null` | `null` | Scroll container for the `IntersectionObserver`. `null` is the viewport. |
+| `scrollMargin` | `number \| string` | — | Margin for nested scroll containers, in px or as a CSS length. The browser must support it. |
+
+## The wrapper
+
+lazymage puts the image in a wrapper `<span>` when one of these conditions is true:
+
+- You set `effect` or `placeholderSrc`, and `visibleByDefault` is `false`.
+- You set `wrapperClassName` or `wrapperProps`.
+
+The wrapper has the `lazy-load-image-background` class and the effect class. When the image is loaded, it also gets the `lazy-load-image-loaded` class. The wrapper uses `display: inline-block` and the `width` and `height` of the image.
+
+## Load states
+
+The `<img>` and the wrapper have a `data-state` attribute.
+
+| Value | Meaning |
+| --- | --- |
+| `idle` | The image is not near the viewport yet. Only the wrapper has this value. |
+| `loading` | The image renders and loads. |
+| `loaded` | The image is loaded and decoded. |
+| `error` | The image failed to load. If you set `fallbackSrc`, the fallback also failed. |
+
+A new `src` resets the state to `loading`. Then the effect plays again, and `onLoad` is called again.
+
+See [Styling](/guides/styling) for examples.
+
+## Callbacks
+
+- `beforeLoad` runs one time, right before the `<img>` renders.
+- `onLoad` and `afterLoad` run when the `<img>` sends its `load` event.
+- `onReady` runs after the image is loaded and decoded. It also runs for an image that loaded before React hydrated it.
+
+<Callout type="note">
+  An image can finish loading before React hydrates the page. Then no `load`
+  event reaches React, so `onLoad` and `afterLoad` do not run. Use `onReady` if
+  you must know when the image is ready.
+</Callout>
