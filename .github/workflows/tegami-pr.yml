@@ -1,0 +1,36 @@
+name: Run Tegami for the release preview
+
+# The pull request code runs here, so this workflow stays read-only.
+# `tegami-pr-comment.yml` posts the preview.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tegami-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tegami:
+    name: Tegami
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/setup
+
+      - name: Preview
+        run: bun run tegami pr preview --artifact tegami-pr-preview.md
+
+      - name: Upload preview
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tegami-pr-preview
+          path: tegami-pr-preview.md
