@@ -1,0 +1,85 @@
+---
+title: Getting started
+description: Show a lazy image with a placeholder and a blur effect.
+---
+
+## Show a lazy image
+
+Import `LazyLoadImage` and use it like an `<img>`.
+
+```tsx
+import { LazyLoadImage } from "lazymage";
+
+export const Photo = () => (
+  <LazyLoadImage
+    alt="A lake at sunset"
+    height={480}
+    src="/lake.jpg"
+    width={640}
+  />
+);
+```
+
+The image renders when it is 100 px from the viewport. To change this distance, set `threshold`.
+
+<Callout type="tip">
+  Always set `width` and `height`. The placeholder then keeps the space of the
+  image, and the page does not move when the image loads.
+</Callout>
+
+## Add an effect
+
+An effect shows while the image loads. lazymage has three effects: `blur`, `opacity`, and `black-and-white`.
+
+1. Import the CSS file of the effect one time in your app.
+2. Set the `effect` prop to the name of the effect.
+
+```tsx
+import { LazyLoadImage } from "lazymage";
+import "lazymage/effects/blur.css";
+
+export const Photo = () => (
+  <LazyLoadImage
+    alt="A lake at sunset"
+    effect="blur"
+    height={480}
+    placeholderSrc="/lake-small.jpg"
+    src="/lake.jpg"
+    width={640}
+  />
+);
+```
+
+`placeholderSrc` is a small version of the image. lazymage shows it as the background until the full image loads. With the `blur` effect, the user sees a blurred preview.
+
+## Show a fallback image
+
+Set `fallbackSrc` to show a different image when `src` fails to load. lazymage tries the fallback one time.
+
+```tsx
+<LazyLoadImage
+  alt="User avatar"
+  fallbackSrc="/avatar-default.png"
+  src={user.avatarUrl}
+/>
+```
+
+## Lazy load a component
+
+Use `LazyLoadComponent` to render any content only when it comes near the viewport.
+
+```tsx
+import { LazyLoadComponent } from "lazymage";
+
+export const Comments = () => (
+  <LazyLoadComponent placeholder={<p>Loading comments…</p>}>
+    <CommentList />
+  </LazyLoadComponent>
+);
+```
+
+## Next steps
+
+- [LazyLoadImage](/api/lazy-load-image): see all the props.
+- [Styling](/guides/styling): change the effects and use the `data-state` attribute.
+- [SSR and React Server Components](/guides/ssr): show images above the fold at once.

@@ -1,0 +1,38 @@
+---
+title: Migration from react-lazy-load-image-component
+description: Move to lazymage. Change the imports and keep your code.
+---
+
+lazymage has the same API as `react-lazy-load-image-component`. It has the same components, props, and CSS classes.
+
+## Change the imports
+
+1. Install lazymage and remove the old package.
+2. Change the component imports.
+3. Change the effect CSS imports.
+
+```diff
+- import { LazyLoadImage } from "react-lazy-load-image-component";
+- import "react-lazy-load-image-component/src/effects/blur.css";
++ import { LazyLoadImage } from "lazymage";
++ import "lazymage/effects/blur.css";
+```
+
+`LazyLoadImage`, `LazyLoadComponent`, and `trackWindowScroll` have the same names.
+
+## Behavior differences
+
+- **React 19 only.** lazymage needs `react` and `react-dom` 19 or newer.
+- **No runtime dependencies.** lazymage does not use `lodash` or `prop-types`.
+- **New `data-state` attribute.** The `<img>` and the wrapper show the load state. See [Load states](/api/lazy-load-image#load-states).
+- **A new `src` resets the state.** The state goes back to `loading`, the effect plays again, and `onLoad` and `afterLoad` run again for the new image.
+- **Images loaded before hydration.** The state becomes `loaded`, the wrapper gets the `lazy-load-image-loaded` class, and `onReady` runs. `onLoad` and `afterLoad` do not run, because no `load` event reaches React.
+- **`trackWindowScroll` uses a ref.** It finds the scroll container through the `ref` that it gives to your component, not through `findDOMNode`. Without an attached ref, it tracks the window. See [Scroll containers](/api/track-window-scroll#scroll-containers).
+
+## New features
+
+You can use these features after the migration. They are optional.
+
+- `fallbackSrc`, `onReady`, `preload`, `root`, and `scrollMargin` props. See [LazyLoadImage](/api/lazy-load-image#new-props).
+- The `useLazyLoad` and `useImageStatus` hooks. See [Hooks](/api/hooks).
+- The effects turn off their transitions when the user prefers reduced motion.

@@ -1,0 +1,40 @@
+---
+title: Introduction
+description: lazymage lazy loads images and components in React 19.
+---
+
+lazymage renders an image or a component only when it comes near the viewport. Until then, it shows a placeholder. It can also show an effect, like a blur, while the image loads.
+
+lazymage is a TypeScript rewrite of [react-lazy-load-image-component](https://github.com/Aljullu/react-lazy-load-image-component) for React 19. It keeps the same API, so you can change the import and keep your code.
+
+## Why use lazymage
+
+- Pages load faster, because the browser fetches only the images that the user can see.
+- One shared `IntersectionObserver` watches all the elements with the same settings.
+- The image shows only after it is loaded and decoded, so the user does not see a partial image.
+- It has no runtime dependencies. `react` and `react-dom` are peer dependencies.
+
+## Install
+
+lazymage needs React 19 and React DOM 19.
+
+<CodeGroup>
+
+```bash bun
+bun add lazymage
+```
+
+```bash pnpm
+pnpm add lazymage
+```
+
+```bash npm
+npm install lazymage
+```
+
+</CodeGroup>
+
+## Next steps
+
+- [Getting started](/getting-started): show your first lazy image.
+- [Migration](/guides/migration): move from `react-lazy-load-image-component`.

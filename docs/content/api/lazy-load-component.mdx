@@ -1,0 +1,44 @@
+---
+title: LazyLoadComponent
+description: Render any content only when it comes near the viewport.
+---
+
+```tsx
+import { LazyLoadComponent } from "lazymage";
+
+<LazyLoadComponent placeholder={<div className="skeleton" />}>
+  <Chart data={data} />
+</LazyLoadComponent>;
+```
+
+Until the content is near the viewport, `LazyLoadComponent` renders a placeholder. Then it renders `children`. It does not go back to the placeholder.
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | — | Content to render when it is near the viewport. |
+| `placeholder` | `ReactNode` | — | Content to show until `children` render. |
+| `className` | `string` | — | Class name of the placeholder `<span>`. |
+| `style` | `CSSProperties` | — | Style of the placeholder `<span>`. |
+| `width` | `number \| string` | — | Width of the placeholder `<span>`. |
+| `height` | `number \| string` | — | Height of the placeholder `<span>`. |
+| `beforeLoad` | `() => void` | — | Called one time, right before `children` render. |
+| `afterLoad` | `() => void` | — | Called one time, after `children` rendered. |
+| `threshold` | `number` | `100` | Distance in px from the viewport at which `children` render. |
+| `visibleByDefault` | `boolean` | `false` | Render `children` at once. |
+| `useIntersectionObserver` | `boolean` | `true` | Use an `IntersectionObserver` when the browser supports it. |
+| `root` | `Element \| Document \| null` | `null` | Scroll container for the `IntersectionObserver`. `null` is the viewport. |
+| `scrollMargin` | `number \| string` | — | Margin for nested scroll containers, in px or as a CSS length. |
+| `scrollPosition` | `ScrollPosition \| null` | — | Scroll position from [`trackWindowScroll`](/api/track-window-scroll). |
+| `delayMethod` | `"throttle" \| "debounce"` | `"throttle"` | How to limit the scroll and resize checks without `IntersectionObserver`. |
+| `delayTime` | `number` | `300` | Time in ms for `delayMethod`. |
+
+## The placeholder
+
+lazymage must observe a DOM element to know when the content is near the viewport.
+
+- If `placeholder` is an element like `<div />`, lazymage gives it a `ref` and observes it directly. A `forwardRef` or `memo` component must pass this `ref` to a DOM element.
+- Other content, like text or a function component, goes inside a placeholder `<span>`. lazymage observes the `<span>`.
+
+The `className`, `style`, `width`, and `height` props apply only to the placeholder `<span>`.
