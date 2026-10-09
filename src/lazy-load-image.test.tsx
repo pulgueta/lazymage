@@ -1,5 +1,6 @@
 import { act, fireEvent, render } from "@testing-library/react";
 import { createRef } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { hydrateFromServer } from "../test/hydrate";
@@ -126,13 +127,28 @@ describe(LazyLoadImage, () => {
     const wrapper = container.querySelector<HTMLElement>("span.frame");
 
     expect(wrapper).toHaveStyle({
-      backgroundImage: "url(/tiny.jpg)",
+      backgroundImage: 'url("/tiny.jpg")',
       backgroundSize: "100% 100%",
       color: "transparent",
       display: "inline-block",
       height: "50px",
       width: "80px",
     });
+  });
+
+  // happy-dom drops quoted URLs with spaces or escapes, so read the markup.
+  it("quotes and escapes placeholderSrc in the CSS url()", () => {
+    const html = renderToStaticMarkup(
+      <LazyLoadImage
+        alt=""
+        placeholderSrc={String.raw`/a "b" \c (1).jpg`}
+        src="/a.jpg"
+      />
+    );
+
+    expect(html).toContain(
+      String.raw`background-image:url(&quot;/a \&quot;b\&quot; \\c (1).jpg&quot;)`
+    );
   });
 
   it("removes the placeholderSrc background once the image is loaded", async () => {
@@ -225,6 +241,28 @@ describe(LazyLoadImage, () => {
 
     expect(onError).toHaveBeenCalledOnce();
     expect(getImage()).toHaveAttribute("src", "/fallback.jpg");
+  });
+
+  it("drops srcSet and sizes while fallbackSrc is shown", () => {
+    installIntersectionObserver();
+    render(
+      <LazyLoadImage
+        alt=""
+        fallbackSrc="/fallback.jpg"
+        sizes="50vw"
+        src="/broken.jpg"
+        srcSet="/broken-2x.jpg 2x"
+        visibleByDefault
+      />
+    );
+
+    expect(getImage()).toHaveAttribute("srcset", "/broken-2x.jpg 2x");
+
+    fireEvent.error(getImage());
+
+    expect(getImage()).toHaveAttribute("src", "/fallback.jpg");
+    expect(getImage()).not.toHaveAttribute("srcset");
+    expect(getImage()).not.toHaveAttribute("sizes");
   });
 
   it("gives the image element to the ref of the user", () => {

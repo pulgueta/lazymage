@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import type { Ref } from "react";
-import { createRef } from "react";
+import { Component, createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -25,6 +25,15 @@ const Gallery = ({ label, ref, scrollPosition }: GalleryProps) => (
 );
 
 const TrackedGallery = trackWindowScroll(Gallery);
+
+// oxlint-disable-next-line react/prefer-function-component -- the test needs a class component, which gives its instance to the ref.
+class ClassGallery extends Component<Omit<GalleryProps, "ref">> {
+  override render() {
+    return <div data-label={this.props.label} data-testid="gallery" />;
+  }
+}
+
+const TrackedClassGallery = trackWindowScroll(ClassGallery);
 
 const readPosition = (): string | null =>
   screen.getByTestId("gallery").textContent;
@@ -128,6 +137,15 @@ describe(trackWindowScroll, () => {
       expect.any(Function),
       { passive: true }
     );
+  });
+
+  it("ignores a class instance as the scroll target and for the ref of the user", () => {
+    installLegacyIntersectionObserver();
+    const ref = createRef<Element>();
+    render(<TrackedClassGallery ref={ref} />);
+
+    expect(screen.getByTestId("gallery")).toBeInTheDocument();
+    expect(ref.current).toBeNull();
   });
 
   it("lets LazyLoadImage children load from the tracked position", () => {

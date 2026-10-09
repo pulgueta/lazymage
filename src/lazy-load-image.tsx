@@ -39,6 +39,10 @@ export interface LazyLoadImageProps
   preload?: boolean;
 }
 
+/** Quote the URL for CSS `url()` and escape `"` and `\` in it. */
+const toCssUrl = (url: string): string =>
+  `url("${url.replaceAll(/["\\]/gu, String.raw`\$&`)}")`;
+
 interface WrapperStyleOptions {
   height: number | string | undefined;
   isLoaded: boolean;
@@ -60,7 +64,7 @@ const createWrapperStyle = ({
   };
 
   if (!isLoaded && placeholderSrc !== undefined && placeholderSrc !== "") {
-    style.backgroundImage = `url(${placeholderSrc})`;
+    style.backgroundImage = toCssUrl(placeholderSrc);
     style.backgroundSize = "100% 100%";
   }
 
@@ -117,6 +121,9 @@ export const LazyLoadImage = ({
   }
 
   const isLoaded = status.state === "loaded";
+  // The fallback replaces the responsive sources too. Else the browser can
+  // pick the failed source again from `srcSet`.
+  const isFallbackShown = status.src !== src;
 
   const handleLoad = (event: SyntheticEvent<HTMLImageElement>): void => {
     onLoad?.(event);
@@ -157,7 +164,9 @@ export const LazyLoadImage = ({
         onError={handleError}
         onLoad={isLoaded ? undefined : handleLoad}
         ref={imageRef}
+        sizes={isFallbackShown ? undefined : sizes}
         src={status.src}
+        srcSet={isFallbackShown ? undefined : srcSet}
       />
     </LazyLoadComponent>
   );

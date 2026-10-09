@@ -12,7 +12,7 @@ type VisibleCallback = () => void;
 
 interface PooledObserver {
   observer: IntersectionObserver;
-  callbacks: Map<Element, VisibleCallback>;
+  callbacks: Map<Element, Set<VisibleCallback>>;
 }
 
 type PoolsByMargin = Map<string, PooledObserver>;
@@ -53,7 +53,7 @@ const createPooledObserver = (
   key: string,
   { root = null, rootMargin, scrollMargin }: VisibilityObserverOptions
 ): PooledObserver => {
-  const callbacks = new Map<Element, VisibleCallback>();
+  const callbacks = new Map<Element, Set<VisibleCallback>>();
   const init: IntersectionObserverInit = { root, rootMargin };
 
   if (scrollMargin !== undefined && supportsScrollMargin()) {
@@ -62,14 +62,16 @@ const createPooledObserver = (
 
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
-      const notifyVisible = entry.isIntersecting
+      const subscribers = entry.isIntersecting
         ? callbacks.get(entry.target)
         : undefined;
 
-      if (notifyVisible) {
+      if (subscribers) {
         callbacks.delete(entry.target);
         observer.unobserve(entry.target);
-        notifyVisible();
+        for (const notifyVisible of subscribers) {
+          notifyVisible();
+        }
       }
     }
 
@@ -87,7 +89,8 @@ const createPooledObserver = (
 /**
  * Call `onVisible` once, the first time `element` intersects the root.
  * Elements with the same root and margins share one IntersectionObserver.
- * The returned function stops the observation.
+ * Each call is an independent subscription, also for the same element.
+ * The returned function stops this subscription.
  */
 export const observeVisibility = (
   element: Element,
@@ -98,11 +101,21 @@ export const observeVisibility = (
   const key = `${options.rootMargin}|${options.scrollMargin ?? ""}`;
   const pooled = pools.get(key) ?? createPooledObserver(pools, key, options);
 
-  pooled.callbacks.set(element, onVisible);
+  // A new function for each call, so that two subscriptions with the same
+  // `onVisible` stay independent.
+  const subscription: VisibleCallback = () => {
+    onVisible();
+  };
+  const subscribers = pooled.callbacks.get(element) ?? new Set();
+  subscribers.add(subscription);
+  pooled.callbacks.set(element, subscribers);
   pooled.observer.observe(element);
 
   return () => {
-    if (pooled.callbacks.get(element) !== onVisible) {
+    // Read the set from the map: after a reveal, a new subscription can
+    // own a new set for the same element.
+    const current = pooled.callbacks.get(element);
+    if (current?.delete(subscription) !== true || current.size > 0) {
       return;
     }
 
