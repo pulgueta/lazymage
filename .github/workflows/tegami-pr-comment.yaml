@@ -1,0 +1,38 @@
+name: Tegami PR Comment
+
+# Runs from `workflow_run` in the base repository context. It has write
+# permissions, so it never runs the pull request code.
+on:
+  workflow_run:
+    workflows: ["Tegami PR"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  comment:
+    name: Post preview comment
+    if: >
+      github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup environment
+        uses: ./.github/setup
+
+      - name: Download preview
+        uses: actions/download-artifact@v4
+        with:
+          name: tegami-pr-preview
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Post preview comment
+        run: bun run tegami pr comment tegami-pr-preview.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

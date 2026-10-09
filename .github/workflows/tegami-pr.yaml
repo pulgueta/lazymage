@@ -1,0 +1,32 @@
+name: Tegami PR
+
+# Runs on `pull_request` (not `pull_request_target`). It runs the pull request
+# code, so it stays read-only. `tegami-pr-comment.yaml` posts the result.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    name: Release preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/setup
+
+      - name: Release preview
+        run: bun run tegami pr preview --artifact tegami-pr-preview.md
+
+      - name: Upload preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: tegami-pr-preview
+          path: tegami-pr-preview.md

@@ -1,5 +1,7 @@
 name: Release
 
+# `tegami ci` opens a version pull request when `.tegami/` has pending
+# changelogs. After that pull request merges, it publishes from the publish lock.
 on:
   push:
     branches:
@@ -7,14 +9,19 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
 jobs:
   release:
-    name: release-package
+    name: Version and publish
     if: github.repository == 'pulgueta/lazymage'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -22,18 +29,10 @@ jobs:
         uses: ./.github/setup
 
       - name: Build package
-        id: build
         run: bun run build
 
-      - name: Create Release Pull Request
-        if: steps.build.conclusion == 'success'
-        uses: changesets/action@v1
+      - name: Version and publish
+        run: bun run tegami ci
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        with:
-          createGithubReleases: true
-          commit: "chore(release): release"
-          version: bun run version
-          publish: bun run release
-          title: "chore(release): release"
+          GITHUB_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
