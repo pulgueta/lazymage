@@ -1,5 +1,5 @@
 name: Setup
-description: Setup the environment for the project
+description: Install Bun, Node.js, and the project dependencies
 
 runs:
   using: composite
@@ -8,16 +8,22 @@ runs:
     - name: Install Bun
       uses: oven-sh/setup-bun@v2
       with:
-        bun-version: "latest"
+        bun-version: latest
+
+    - name: Install Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        registry-url: "https://registry.npmjs.org"
 
     - name: Setup cache
       uses: actions/cache@v4
       with:
         path: ~/.bun/install/cache
-        key: ${{ runner.os }}-${{ matrix.bun }}-bun-${{ hashFiles('**/bun.lock') }}
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.bun }}-bun-
+          ${{ runner.os }}-bun-
 
     - name: Install dependencies
       shell: bash
-      run: bun install
+      run: bun install --frozen-lockfile

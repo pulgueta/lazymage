@@ -53,3 +53,56 @@ To contribute in this way, follow these steps:
 4. If you can reproduce the issue, follow the steps provided and document your findings in a comment.
 5. Offer suggestions, workarounds, or explanations to help resolve the issue.
 6. Engage in respectful and constructive conversations with the issue reporter and other contributors.
+
+## Submitting Pull Requests
+
+### Set up the project
+
+You need [Bun](https://bun.sh) and Node.js 24 or newer.
+
+```bash
+bun install
+```
+
+### Commands
+
+| Command | What it does |
+| --- | --- |
+| `bun run check` | Lint (Oxlint) and check the format (Oxfmt) through Ultracite. |
+| `bun run fix` | Apply the safe lint and format fixes. |
+| `bun run typecheck` | Check the types with TypeScript. |
+| `bun run test` | Run the tests with Vitest. |
+| `bun run build` | Build the package into `dist/`. |
+| `bun run lint:package` | Check the package with publint and Are the Types Wrong. Run `build` first. |
+| `bun run docs:dev` | Start the docs site with Blume. |
+| `bun run docs:build` | Build the docs site into `docs/dist/`. |
+
+Run `check`, `typecheck`, and `test` before you open a pull request.
+
+### Add a changelog
+
+lazymage uses [Tegami](https://tegami.fuma-nama.dev) for versions and releases. If your change affects users, add a changelog file.
+
+1. Run `bun run tegami`.
+2. Select the bump type: `patch`, `minor`, or `major`.
+3. Write a short description for users.
+4. Commit the new file in `.tegami/` with your change.
+
+You can also write the file by hand. Name it `.tegami/YYYY-MM-DD-<hash>.md`:
+
+```md
+---
+packages:
+  lazymage: patch
+---
+
+## Fix the blur effect in Safari
+
+The blur effect now ends when the image loads.
+```
+
+Do not edit `CHANGELOG.md` or `.tegami/publish-lock.yaml`.
+
+### Releases
+
+When a pull request with a changelog merges into `master`, Tegami opens a version pull request. When the version pull request merges, Tegami publishes the package to npm and creates a GitHub release.

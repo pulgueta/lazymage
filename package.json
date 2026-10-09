@@ -2,53 +2,93 @@
   "name": "lazymage",
   "version": "0.0.0",
   "description": "Lazy load images from your React components",
-  "main": "dist/index.js",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
+  "keywords": [
+    "lazy-loading",
+    "lazyload",
+    "lazyload-images",
+    "lazyloading",
+    "react",
+    "react-component"
+  ],
+  "homepage": "https://github.com/pulgueta/lazymage",
+  "bugs": {
+    "url": "https://github.com/pulgueta/lazymage/issues"
   },
-  "peerDependencies": {
-    "react": "^18.x.x || ^19.x.x"
-  },
-  "dependencies": {
-    "lodash.debounce": "^4.0.8",
-    "lodash.throttle": "^4.1.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@changesets/cli": "^2.28.1",
-    "@rsbuild/plugin-react": "^1.1.1",
-    "@rslib/core": "^0.5.3",
-    "react": "^19.0.0",
-    "ultracite": "^4.1.21"
-  },
-  "scripts": {
-    "build": "rslib build",
-    "lint": "ultracite lint",
-    "format": "ultracite format",
-    "release": "changeset publish",
-    "version": "changeset version"
+  "license": "MIT",
+  "author": {
+    "name": "Andrés Rodríguez (pulgueta)",
+    "email": "afprodriguez@icloud.com"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pulgueta/lazymage.git"
   },
-  "keywords": [
-    "react",
-    "react-component",
-    "lazyload",
-    "lazyloading",
-    "lazy-loading",
-    "lazyload-images"
+  "files": [
+    "dist"
   ],
-  "author": {
-    "name": "Andrés Rodríguez (pulgueta)",
-    "email": "afprodriguez@icloud.com"
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    },
+    "./effects/blur.css": "./dist/effects/blur.css",
+    "./effects/opacity.css": "./dist/effects/opacity.css",
+    "./effects/black-and-white.css": "./dist/effects/black-and-white.css",
+    "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/pulgueta/lazymage/issues"
+  "publishConfig": {
+    "access": "public"
   },
-  "homepage": "https://github.com/pulgueta/lazymage",
-  "trustedDependencies": ["@biomejs/biome", "core-js"]
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:package": "publint && attw --pack . --entrypoints .",
+    "docs:dev": "cd docs && blume dev",
+    "docs:build": "cd docs && blume build",
+    "tegami": "node scripts/tegami.mts"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@rsbuild/plugin-react": "2.1.1",
+    "@rslib/core": "1.0.3",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "blume": "2.2.1",
+    "happy-dom": "20.14.6",
+    "oxfmt": "0.72.0",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2003",
+    "publint": "0.3.25",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tegami": "1.5.0",
+    "typescript": "7.0.2",
+    "ultracite": "7.12.4",
+    "vitest": "5.0.3"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
 }

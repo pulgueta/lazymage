@@ -1,29 +1,39 @@
 import { pluginReact } from "@rsbuild/plugin-react";
 import { defineConfig } from "@rslib/core";
 
+const USE_CLIENT_BANNER = '"use client";';
+
 export default defineConfig({
   lib: [
     {
+      banner: { js: USE_CLIENT_BANNER },
+      bundle: false,
+      dts: true,
       format: "esm",
-      syntax: "esnext",
-      banner: {
-        js: "use client",
+      output: {
+        copy: [{ from: "./src/effects", to: "../effects" }],
+        distPath: { root: "./dist/esm" },
       },
     },
     {
+      banner: { js: USE_CLIENT_BANNER },
+      bundle: false,
+      dts: { autoExtension: true },
       format: "cjs",
-      syntax: "esnext",
-      banner: {
-        js: "use client",
+      output: {
+        distPath: { root: "./dist/cjs" },
       },
     },
   ],
   output: {
-    target: "web",
     cleanDistPath: true,
-    distPath: {
-      root: "dist",
-    },
+    target: "web",
   },
   plugins: [pluginReact()],
+  source: {
+    entry: {
+      index: ["./src/**/*.{ts,tsx}", "!./src/**/*.test.{ts,tsx}"],
+    },
+    tsconfigPath: "./tsconfig.build.json",
+  },
 });
